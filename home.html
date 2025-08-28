@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload de Arquivos</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <header class="header">
+        <h1>Fazer Uploads dos Arquivos</h1>
+    </header>
+
+    <main class="main">
+        <section class="upload-section">
+            <h1>Comparar Chaves de Acesso</h1>
+            <form id="uploadForm">
+                <div class="input-group">
+                    <label for="excelFile">Arquivo Excel:</label>
+                    <input type="file" name="excelFile" id="excelFile" accept=".xls,.xlsx" required />
+                </div>
+
+                <div class="input-group">
+                    <label for="pdfFile">Arquivo PDF:</label>
+                    <input type="file" name="pdfFile" id="pdfFile" accept=".pdf" required />
+                </div>
+
+                <button type="submit">Enviar e Comparar</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        const backendUrl = "https://SEU_BACKEND_RENDER.onrender.com"; // colocar a URL do Render
+
+        document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            try {
+                const res = await fetch(`${backendUrl}/api/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error("Erro no upload");
+
+                const data = await res.json();
+                // Salva os resultados no localStorage para a página de resultados
+                localStorage.setItem("chavesFaltando", JSON.stringify(data.chavesFaltando));
+                window.location.href = "nfe.html";
+            } catch (err) {
+                alert("Erro ao processar arquivos: " + err.message);
+            }
+        });
+    </script>
+</body>
+
+</html>
