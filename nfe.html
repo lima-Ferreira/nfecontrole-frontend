@@ -15,7 +15,12 @@
             <i class="fas fa-arrow-left"></i> Voltar para Upload
         </a>
         <h1>Notas Fiscais Faltando nas Entradas</h1>
-        <div id="download-link-container"></div>
+        <div id="download-link-container">
+            <!-- Link de download direto -->
+            <a href="/download-excel" class="download-link">
+                <i class="fas fa-download"></i> Baixar Excel
+            </a>
+        </div>
     </header>
 
     <main class="main">
@@ -25,13 +30,10 @@
     </main>
 
     <script>
-        const backendUrl = "https://nfecontrole-backend.onrender.com";
-
+        // Pega as chaves da sessão armazenadas no localStorage (mesmo que a sessão do backend já tenha)
         const chavesFaltando = JSON.parse(localStorage.getItem("chavesFaltando") || "[]");
         const resultsContainer = document.getElementById("results-container");
-        const downloadContainer = document.getElementById("download-link-container");
 
-        // Exibir tabela de resultados
         if (chavesFaltando.length > 0) {
             let tableHTML = `<table class="table"><thead>
                 <tr>
@@ -60,36 +62,6 @@
 
             tableHTML += `</tbody></table>`;
             resultsContainer.innerHTML = tableHTML;
-
-            // Criar botão de download
-            downloadContainer.innerHTML = `<a href="#" id="download-excel" class="download-link">
-                <i class="fas fa-download"></i> Baixar Excel
-            </a>`;
-
-            // Download via fetch
-            document.getElementById("download-excel").addEventListener("click", async (e) => {
-                e.preventDefault();
-                try {
-                    const response = await fetch(`${backendUrl}/api/download-excel`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(chavesFaltando)
-                    });
-                    if (!response.ok) throw new Error("Erro ao gerar Excel");
-
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "chaves_faltando.xlsx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                } catch (err) {
-                    alert("Erro ao baixar Excel: " + err.message);
-                }
-            });
 
         } else {
             resultsContainer.innerHTML = "<p>Nenhuma diferença encontrada. Todas as chaves do Excel estão no PDF.</p>";
