@@ -15,12 +15,7 @@
             <i class="fas fa-arrow-left"></i> Voltar para Upload
         </a>
         <h1>Notas Fiscais Faltando nas Entradas</h1>
-        <div id="download-link-container">
-            <!-- Link de download direto -->
-            <a href="/download-excel" class="download-link">
-                <i class="fas fa-download"></i> Baixar Excel
-            </a>
-        </div>
+        <div id="download-link-container"></div>
     </header>
 
     <main class="main">
@@ -30,11 +25,19 @@
     </main>
 
     <script>
-        // Pega as chaves da sessão armazenadas no localStorage (mesmo que a sessão do backend já tenha)
+        // Pega as chaves faltando do localStorage
         const chavesFaltando = JSON.parse(localStorage.getItem("chavesFaltando") || "[]");
         const resultsContainer = document.getElementById("results-container");
+        const downloadContainer = document.getElementById("download-link-container");
 
         if (chavesFaltando.length > 0) {
+            // Cria o link de download com query string
+            const dataParam = encodeURIComponent(JSON.stringify(chavesFaltando));
+            downloadContainer.innerHTML = `<a href="/api/download-excel?data=${dataParam}" class="download-link">
+                <i class="fas fa-download"></i> Baixar Excel
+            </a>`;
+
+            // Monta a tabela
             let tableHTML = `<table class="table"><thead>
                 <tr>
                     <th>Data</th>
