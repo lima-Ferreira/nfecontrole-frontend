@@ -30,8 +30,8 @@
         const resultsContainer = document.getElementById("results-container");
         const downloadContainer = document.getElementById("download-link-container");
 
-        // Monta a tabela de resultados
         if (chavesFaltando.length > 0) {
+            // Monta a tabela de resultados
             let tableHTML = `<table class="table"><thead>
                 <tr>
                     <th>Data</th>
@@ -60,10 +60,11 @@
             tableHTML += `</tbody></table>`;
             resultsContainer.innerHTML = tableHTML;
 
-            // Cria o botão de download usando POST
+            // Botão de download via POST
             const downloadBtn = document.createElement("button");
             downloadBtn.classList.add("download-link");
             downloadBtn.innerHTML = `<i class="fas fa-download"></i> Baixar Excel`;
+
             downloadBtn.onclick = async () => {
                 try {
                     const response = await fetch(`${backendUrl}/api/download-excel`, {
@@ -72,9 +73,7 @@
                         body: JSON.stringify({ chavesFaltando })
                     });
 
-                    if (!response.ok) {
-                        throw new Error("Erro ao gerar Excel.");
-                    }
+                    if (!response.ok) throw new Error("Erro ao gerar Excel.");
 
                     const blob = await response.blob();
                     const url = URL.createObjectURL(blob);
@@ -84,6 +83,7 @@
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
+                    URL.revokeObjectURL(url);
                 } catch (err) {
                     alert(err.message);
                     console.error(err);
