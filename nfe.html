@@ -25,43 +25,72 @@
     </main>
 
     <script>
-        const backendUrl = "https://nfecontrole-backend.onrender.com"; // URL do backend
-
-        console.log("Backend URL atual:", backendUrl);
+        const backendUrl = "https://nfecontrole-backend.onrender.com";
 
         const chavesFaltando = JSON.parse(localStorage.getItem("chavesFaltando") || "[]");
         const resultsContainer = document.getElementById("results-container");
         const downloadContainer = document.getElementById("download-link-container");
 
+        // Exibir tabela de resultados
         if (chavesFaltando.length > 0) {
-            downloadContainer.innerHTML = `<a href="${backendUrl}/api/download-excel" class="download-link"><i class="fas fa-download"></i> Baixar Excel</a>`;
-
             let tableHTML = `<table class="table"><thead>
-        <tr>
-          <th>Data</th>
-          <th>UF</th>
-          <th>Documento</th>
-          <th>Chave</th>
-          <th>Fornecedor</th>
-          <th>Situação</th>
-          <th>Valor</th>
-        </tr></thead><tbody>`;
+                <tr>
+                    <th>Data</th>
+                    <th>UF</th>
+                    <th>Documento</th>
+                    <th>Chave</th>
+                    <th>Fornecedor</th>
+                    <th>Situação</th>
+                    <th>Valor</th>
+                </tr>
+            </thead><tbody>`;
 
             chavesFaltando.forEach(item => {
                 const cancelado = item.autorizacao?.toLowerCase() === "cancelado";
                 tableHTML += `<tr class="${cancelado ? "linha-cancelada" : ""}">
-          <td>${item.dataTempo || ""}</td>
-          <td>${item.uf || ""}</td>
-          <td>${item.numDoc || ""}</td>
-          <td>${item.chave || ""}</td>
-          <td>${item.fornecedor || ""}</td>
-          <td>${item.autorizacao || ""}</td>
-          <td>${item.valorDoDoc || ""}</td>
-        </tr>`;
+                    <td>${item.dataTempo || ""}</td>
+                    <td>${item.uf || ""}</td>
+                    <td>${item.numDoc || ""}</td>
+                    <td>${item.chave || ""}</td>
+                    <td>${item.fornecedor || ""}</td>
+                    <td>${item.autorizacao || ""}</td>
+                    <td>${item.valorDoDoc || ""}</td>
+                </tr>`;
             });
 
             tableHTML += `</tbody></table>`;
             resultsContainer.innerHTML = tableHTML;
+
+            // Criar botão de download
+            downloadContainer.innerHTML = `<a href="#" id="download-excel" class="download-link">
+                <i class="fas fa-download"></i> Baixar Excel
+            </a>`;
+
+            // Download via fetch
+            document.getElementById("download-excel").addEventListener("click", async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch(`${backendUrl}/api/download-excel`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(chavesFaltando)
+                    });
+                    if (!response.ok) throw new Error("Erro ao gerar Excel");
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "chaves_faltando.xlsx";
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } catch (err) {
+                    alert("Erro ao baixar Excel: " + err.message);
+                }
+            });
+
         } else {
             resultsContainer.innerHTML = "<p>Nenhuma diferença encontrada. Todas as chaves do Excel estão no PDF.</p>";
         }
